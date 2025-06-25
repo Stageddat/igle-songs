@@ -29,8 +29,12 @@ export async function convertPdfToPng(
 
     console.log(`${pngFiles.length} images exported to: ${outputDir}`);
     return pngFiles;
-  } catch (error: any) {
-    console.error("failed converting pdf to png:", error.message || error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("failed converting pdf to png:", error.message);
+    } else {
+      console.error("failed converting pdf to png:", error);
+    }
     return [];
   }
 }

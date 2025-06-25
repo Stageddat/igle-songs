@@ -1,35 +1,33 @@
-"use client"
+// app/layout.tsx
+"use client";
 
-import React, { useEffect, useState } from "react"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { Toaster } from "sonner"
-import { getLocaleStrings } from "@/lib/getLocaleStrings"
-
-const inter = Inter({ subsets: ["latin"] })
+import React from "react";
+import "./globals.css";
+import { Toaster } from "sonner";
+import { useTranslation } from "react-i18next";
+import "@/i18n"; // Import your i18n configuration here to ensure it's initialized
 
 export default function RootLayout({
 	children,
 }: {
-	children: React.ReactNode
+	children: React.ReactNode;
 }) {
-	const [strings, setStrings] = useState<{ [key: string]: string }>({})
+	// const { i18n: i18nextInstance } = useTranslation();
 
-	useEffect(() => {
-		getLocaleStrings().then((res) => {
-			setStrings(res)
-			document.title = res.metaDataTitle
-			const desc = document.querySelector('meta[name="description"]')
-			if (desc) desc.setAttribute("content", res.metaDataDescription)
-		})
-	}, [])
+	// const primaryLang = i18nextInstance.language;
+	const { t } = useTranslation();
 
 	return (
-		<html lang={strings.language}>
-			<body className={inter.className}>
+		<html>
+			<head>
+				<title>{t("metaDataTitle")}</title>
+				<meta name="description" content={t("metaDataDescription")} />
+			</head>
+			<body>
+				<Toaster position="top-center" richColors />
+
 				{children}
-				<Toaster theme="dark" position="top-right" richColors />
 			</body>
 		</html>
-	)
+	);
 }

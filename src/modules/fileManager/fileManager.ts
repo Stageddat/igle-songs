@@ -54,8 +54,12 @@ export async function processFiles() {
   for (const pptxFile of pptxPaths) {
     try {
       await fs.unlink(pptxFile);
-    } catch (error: any) {
-      console.error(`failed to delete ${pptxFile}:`, error.message || error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(`failed to delete ${pptxFile}:`, error.message);
+      } else {
+        console.error(`failed to delete ${pptxFile}:`, error);
+      }
     }
   }
 
@@ -87,8 +91,12 @@ export async function processFiles() {
       // crear dir si no existe
       try {
         await fs.mkdir(songDir, { recursive: true });
-      } catch (error: any) {
-        console.error(`failed to create dir ${songDir}:`, error.message);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error(`failed to create dir ${songDir}:`, error.message);
+        } else {
+          console.error(`failed to create dir ${songDir}:`, error);
+        }
         continue;
       }
 
@@ -96,7 +104,12 @@ export async function processFiles() {
       let existingFiles: string[] = [];
       try {
         existingFiles = await fs.readdir(songDir);
-      } catch (error) {
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error(`failed to read dir ${songDir}:`, error.message);
+        } else {
+          console.error(`failed to read dir ${songDir}:`, error);
+        }
         // dir no existe o vacío
         existingFiles = [];
       }
@@ -125,11 +138,15 @@ export async function processFiles() {
               sourcePng
             )} -> ${songName}/slide-${slideNumber}.png`
           );
-        } catch (error: any) {
-          console.error(
-            `failed to copy ${sourcePng} to ${destPng}:`,
-            error.message
-          );
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            console.error(
+              `failed to copy ${sourcePng} to ${destPng}:`,
+              error.message
+            );
+          } else {
+            console.error(`failed to copy ${sourcePng} to ${destPng}:`, error);
+          }
         }
       }
     }
@@ -140,8 +157,12 @@ export async function processFiles() {
         await fs.unlink(pngImage);
       }
       await fs.rmdir(tempPngDir);
-    } catch (error: any) {
-      console.error(`failed to clean temp dir:`, error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(`failed to clean temp dir:`, error.message);
+      } else {
+        console.error(`failed to clean temp dir:`, error);
+      }
     }
   }
 
@@ -149,8 +170,12 @@ export async function processFiles() {
   for (const pdfFile of pdfFiles) {
     try {
       await fs.unlink(pdfFile);
-    } catch (error: any) {
-      console.error(`failed to delete ${pdfFile}:`, error.message || error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(`failed to delete ${pdfFile}:`, error.message);
+      } else {
+        console.error(`failed to delete ${pdfFile}:`, error);
+      }
     }
   }
 }
