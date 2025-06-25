@@ -7,5 +7,7 @@
 	"searchPlaceholder": "Search song",
 	"noSongsFound": "No songs found",
 	"songContent": "Song content",
-	"selectSong": "Select a song"
+	"selectSong": "Select a song",
+	"noImagesFound": "No images found",
+	"sendSelection": "Send selection"
 }

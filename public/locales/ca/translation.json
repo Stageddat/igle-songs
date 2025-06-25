@@ -7,5 +7,7 @@
 	"searchPlaceholder": "Cerca de una cançó",
 	"noSongsFound": "No s'han trobat cançons",
 	"songContent": "Contingut de la cançó",
-	"selectSong": "Selecciona una cançó"
+	"selectSong": "Selecciona una cançó",
+	"noImagesFound": "No s'han trobat imatges",
+	"sendSelection": "Enviar selecció"
 }

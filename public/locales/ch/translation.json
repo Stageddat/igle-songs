@@ -7,5 +7,7 @@
 	"searchPlaceholder": "搜索歌曲",
 	"noSongsFound": "未找到歌曲",
 	"songContent": "歌曲内容",
-	"selectSong": "请选择一首歌曲"
+	"selectSong": "请选择一首歌曲",
+	"noImagesFound": "未找到图片",
+	"sendSelection": "发送选择"
 }

@@ -7,5 +7,7 @@
 	"searchPlaceholder": "Buscar canción",
 	"noSongsFound": "No se encontraron canciones",
 	"songContent": "Contenido de la canción",
-	"selectSong": "Selecciona una canción"
+	"selectSong": "Selecciona una canción",
+	"noImagesFound": "No se encontraron imágenes",
+	"sendSelection": "Enviar selección"
 }
