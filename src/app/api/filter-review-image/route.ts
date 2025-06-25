@@ -14,13 +14,10 @@ export async function POST(req: Request) {
       });
     }
 
-    return new Response(
-      JSON.stringify({ message: "Datos recibidos correctamente" }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({ message: "data received" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("Error en el handler:", error);
     return new Response(JSON.stringify({ message: "Internal Server Error" }), {

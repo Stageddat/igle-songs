@@ -130,15 +130,15 @@ export default function SongsDatabase() {
 
 													if (!res.ok) throw new Error("Server error")
 
-													toast.success("Enviado correctamente ✅")
+													toast.success(t("successMessage"))
 
 													setSongs((prev) => prev.filter((s) => s !== selectedSong))
 													setSelectedSong(null)
 													setImages([])
 													setSelectedImages([])
 												} catch (error) {
-													toast.error("Error al enviar ❌")
-													console.error("Error al enviar:", error)
+													toast.error(t("errorMessage"))
+													console.error("failed sending:", error)
 												}
 											}}
 

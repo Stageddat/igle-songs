@@ -9,5 +9,7 @@
 	"songContent": "Contingut de la cançó",
 	"selectSong": "Selecciona una cançó",
 	"noImagesFound": "No s'han trobat imatges",
-	"sendSelection": "Enviar selecció"
+	"sendSelection": "Enviar selecció",
+	"successMessage": "Enviat correctament ✅",
+	"errorMessage": "Error al enviar ❌"
 }

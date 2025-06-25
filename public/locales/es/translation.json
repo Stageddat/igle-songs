@@ -9,5 +9,7 @@
 	"songContent": "Contenido de la canción",
 	"selectSong": "Selecciona una canción",
 	"noImagesFound": "No se encontraron imágenes",
-	"sendSelection": "Enviar selección"
+	"sendSelection": "Enviar selección",
+	"successMessage": "Enviado correctamente ✅",
+	"errorMessage": "Error al enviar ❌"
 }

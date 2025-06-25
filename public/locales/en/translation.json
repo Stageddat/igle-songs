@@ -9,5 +9,7 @@
 	"songContent": "Song content",
 	"selectSong": "Select a song",
 	"noImagesFound": "No images found",
-	"sendSelection": "Send selection"
+	"sendSelection": "Send selection",
+	"successMessage": "Sent successfully ✅",
+	"errorMessage": "Failed to send ❌"
 }

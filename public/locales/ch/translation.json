@@ -9,5 +9,7 @@
 	"songContent": "歌曲内容",
 	"selectSong": "请选择一首歌曲",
 	"noImagesFound": "未找到图片",
-	"sendSelection": "发送选择"
+	"sendSelection": "发送选择",
+	"successMessage": "发送成功 ✅",
+	"errorMessage": "发送失败 ❌"
 }
