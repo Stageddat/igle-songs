@@ -20,7 +20,7 @@ export default function RootLayout({
 				<meta name="description" content={t("metaDataDescription")} />
 			</head>
 			<body>
-				<Toaster position="top-center" richColors />
+				<Toaster position="bottom-left" richColors />
 
 				{children}
 			</body>

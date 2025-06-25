@@ -45,7 +45,7 @@ export default function Navbar() {
 						{t("navSong")}
 					</NavigationMenuLink>
 					<NavigationMenuLink
-						href="/"
+						href="/review"
 						className="text-lg font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition px-3 py-2 rounded"
 					>
 						{t("navReview")}
