@@ -4,10 +4,10 @@ import { promises as fs } from "fs";
 
 export async function GET(
   request: Request,
-  { params }: { params: { song: string } }
+  context: { params: Promise<{ song: string }> }
 ) {
   try {
-    const { song } = await params;
+    const { song } = await context.params;
     const songName = decodeURIComponent(song);
     const filePath = path.join(process.cwd(), "data", "songs.json");
     const fileContent = await fs.readFile(filePath, "utf-8");
@@ -25,8 +25,12 @@ export async function GET(
     const links = songData.links || [];
 
     return NextResponse.json(links);
-  } catch (error) {
-    console.error("failed to get song", error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("failed to get song:", error.message);
+      return new NextResponse("Internal Server Error", { status: 500 });
+    }
+    console.error("failed to get song:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

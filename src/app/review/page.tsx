@@ -55,7 +55,7 @@ export default function SongsDatabase() {
 				console.error("error fetching songs:", error)
 				toast.error(t("errorMessage"))
 			})
-	}, [])
+	}, [t])
 
 	useEffect(() => {
 		if (selectedSong) {
@@ -70,7 +70,7 @@ export default function SongsDatabase() {
 					toast.error(t("errorMessage"))
 				})
 		}
-	}, [selectedSong])
+	}, [selectedSong, t])
 
 
 	const filteredSongs = songs.filter(song =>

@@ -11,8 +11,12 @@ export async function GET() {
     const songs = raw.songsList.map((item: any) => Object.keys(item)[0]);
 
     return NextResponse.json(songs);
-  } catch (error) {
-    console.error("Error reading songs.json", error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("error reading songs.json:", error.message);
+      return new NextResponse("Internal Server Error", { status: 500 });
+    }
+    console.error("error reading songs.json:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

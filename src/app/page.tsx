@@ -19,7 +19,7 @@ export default function HomePage() {
 			.then((res) => res.json())
 			.then(setSongs)
 			.catch(() => toast.error(t("loadSongsError")))
-	}, [])
+	}, [t])
 
 	useEffect(() => {
 		if (selectedSong) {
@@ -28,7 +28,7 @@ export default function HomePage() {
 				.then(setImages)
 				.catch(() => toast.error(t("loadImagesError")))
 		}
-	}, [selectedSong])
+	}, [selectedSong, t])
 
 	const filteredSongs = songs.filter(song =>
 		song.toLowerCase().includes(searchTerm.toLowerCase())

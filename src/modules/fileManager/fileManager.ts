@@ -32,7 +32,7 @@ export async function processFiles() {
     const fileName = path.basename(pptxFile);
     const isSong = songs.some((songName) => fileName.includes(songName));
     if (!isSong) {
-      console.log(`Eliminando archivo no canción: ${fileName}`);
+      console.log(`eliminando archivo no canción: ${fileName}`);
       await fs.unlink(pptxFile);
     }
   }

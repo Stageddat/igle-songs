@@ -37,7 +37,7 @@ i18n
       caches: ["localStorage"],
       lookupLocalStorage: LOCAL_STORAGE_KEY,
     },
-    debug: true,
+    debug: false,
   });
 
 export default i18n;
