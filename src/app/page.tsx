@@ -34,11 +34,39 @@ export default function HomePage() {
 		song.toLowerCase().includes(searchTerm.toLowerCase())
 	)
 
+	const smartFetch = async (url: string): Promise<Response> => {
+		try {
+			const response = await fetch(url, {
+				mode: 'cors',
+				headers: {
+					'Accept': 'image/*',
+				}
+			})
+
+			if (response.ok) {
+				console.log('direct fetch successful')
+				return response
+			}
+			throw new Error(`direct fetch failed: ${response.status}`)
+		} catch (directError) {
+			console.error('direct fetch failed, trying proxy...', directError)
+
+			const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(url)}`
+			const response = await fetch(proxyUrl)
+
+			if (!response.ok) {
+				throw new Error(`proxy fetch also failed: ${response.status}`)
+			}
+
+			console.log('proxy fetch successful')
+			return response
+		}
+	}
+
 	const copyToClipboard = async (url: string) => {
 		try {
-			const response = await fetch(url)
+			const response = await smartFetch(url)
 			const blob = await response.blob()
-
 			const imageBitmap = await createImageBitmap(blob)
 
 			const canvas = document.createElement("canvas")
@@ -64,7 +92,19 @@ export default function HomePage() {
 		}
 	}
 
+	const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
 
+	const getSmartImageUrl = (originalUrl: string) => {
+		if (imageErrors.has(originalUrl)) {
+			return `/api/image-proxy?url=${encodeURIComponent(originalUrl)}`
+		}
+		return originalUrl
+	}
+
+	const handleImageError = (originalUrl: string) => {
+		console.log('image failed, switching to proxy for:', originalUrl)
+		setImageErrors(prev => new Set([...prev, originalUrl]))
+	}
 
 	return (
 		<div className="dark">
@@ -151,9 +191,11 @@ export default function HomePage() {
 														onClick={() => copyToClipboard(img)}
 													>
 														<img
-															src={img}
+															src={getSmartImageUrl(img)}
 															alt="slide"
 															className="w-full max-w-[600px] rounded-xl shadow-md border transition-transform hover:scale-[1.01]"
+															onError={() => handleImageError(img)}
+															key={`${img}-${imageErrors.has(img) ? 'proxy' : 'direct'}`}
 														/>
 													</div>
 												))}

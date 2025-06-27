@@ -14,11 +14,48 @@ export default function SongsDatabase() {
 	const [images, setImages] = useState<string[]>([])
 	const { t } = useTranslation()
 	const [selectedImages, setSelectedImages] = useState<string[]>([])
+	const [adminPassword, setAdminPassword] = useState("")
+
+	// onClick handler moved to top for easier editing
+	const handleSendSelection = async () => {
+		try {
+			const res = await fetch("/api/filter-review-image", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${adminPassword}`,
+				},
+				body: JSON.stringify({
+					song: selectedSong,
+					slides: selectedImages,
+				}),
+			})
+
+			if (!res.ok) {
+				const errorData = await res.json()
+				throw new Error(errorData.message || "Server error")
+			}
+
+			toast.success(t("successMessage"))
+
+			setSongs((prev) => prev.filter((s) => s !== selectedSong))
+			setSelectedSong(null)
+			setImages([])
+			setSelectedImages([])
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : t("errorMessage"))
+			console.error("failed sending:", error)
+		}
+	}
 
 	useEffect(() => {
 		fetch("/api/review-songs")
 			.then((res) => res.json())
 			.then(setSongs)
+			.catch((error) => {
+				console.error("Error fetching songs:", error)
+				toast.error(t("errorMessage"))
+			})
 	}, [])
 
 	useEffect(() => {
@@ -28,6 +65,10 @@ export default function SongsDatabase() {
 				.then((imgs) => {
 					setImages(imgs)
 					setSelectedImages([])
+				})
+				.catch((error) => {
+					console.error("Error fetching images:", error)
+					toast.error(t("errorMessage"))
 				})
 		}
 	}, [selectedSong])
@@ -45,12 +86,19 @@ export default function SongsDatabase() {
 				<div className="flex flex-1 min-h-0">
 					{/* lista de canciones */}
 					<div className="w-1/2 border-r border-border bg-card flex flex-col min-h-0">
-						<div className="p-6 border-b border-border shrink-0">
+						<div className="p-6 border-b border-border shrink-0 space-y-4">
 							<input
 								type="text"
 								placeholder={t("searchPlaceholder")}
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
+								className="w-full px-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+							/>
+							<input
+								type="password"
+								placeholder="Admin Password"
+								value={adminPassword}
+								onChange={(e) => setAdminPassword(e.target.value)}
 								className="w-full px-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
 							/>
 						</div>
@@ -115,33 +163,7 @@ export default function SongsDatabase() {
 
 										{/* boton enviar */}
 										<button
-											onClick={async () => {
-												try {
-													const res = await fetch("/api/filter-review-image", {
-														method: "POST",
-														headers: {
-															"Content-Type": "application/json",
-														},
-														body: JSON.stringify({
-															song: selectedSong,
-															slides: selectedImages,
-														}),
-													})
-
-													if (!res.ok) throw new Error("Server error")
-
-													toast.success(t("successMessage"))
-
-													setSongs((prev) => prev.filter((s) => s !== selectedSong))
-													setSelectedSong(null)
-													setImages([])
-													setSelectedImages([])
-												} catch (error) {
-													toast.error(t("errorMessage"))
-													console.error("failed sending:", error)
-												}
-											}}
-
+											onClick={handleSendSelection}
 											className="mb-6 px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition"
 											disabled={selectedImages.length === 0}
 										>

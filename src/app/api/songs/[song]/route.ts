@@ -4,10 +4,11 @@ import { promises as fs } from "fs";
 
 export async function GET(
   request: Request,
-  context: { params: { song: string } }
+  { params }: { params: { song: string } }
 ) {
   try {
-    const songName = decodeURIComponent(context.params.song);
+    const { song } = await params;
+    const songName = decodeURIComponent(song);
     const filePath = path.join(process.cwd(), "data", "songs.json");
     const fileContent = await fs.readFile(filePath, "utf-8");
     const data = JSON.parse(fileContent);
