@@ -18,7 +18,7 @@ export default function HomePage() {
 		fetch("/api/songs")
 			.then((res) => res.json())
 			.then(setSongs)
-			.catch(() => toast.error("Error al cargar canciones"))
+			.catch(() => toast.error(t("loadSongsError")))
 	}, [])
 
 	useEffect(() => {
@@ -26,7 +26,7 @@ export default function HomePage() {
 			fetch(`/api/songs/${encodeURIComponent(selectedSong)}`)
 				.then((res) => res.json())
 				.then(setImages)
-				.catch(() => toast.error("No se pudieron cargar las imágenes"))
+				.catch(() => toast.error(t("loadImagesError")))
 		}
 	}, [selectedSong])
 
@@ -36,12 +36,35 @@ export default function HomePage() {
 
 	const copyToClipboard = async (url: string) => {
 		try {
-			await navigator.clipboard.writeText(url)
-			toast.success("Copiado al portapapeles")
-		} catch {
-			toast.error("No se pudo copiar")
+			const response = await fetch(url)
+			const blob = await response.blob()
+
+			const imageBitmap = await createImageBitmap(blob)
+
+			const canvas = document.createElement("canvas")
+			canvas.width = imageBitmap.width
+			canvas.height = imageBitmap.height
+
+			const ctx = canvas.getContext("2d")
+			if (!ctx) throw new Error("Canvas context not available")
+			ctx.drawImage(imageBitmap, 0, 0)
+
+			canvas.toBlob(async (pngBlob) => {
+				if (!pngBlob) throw new Error("Failed to convert image to PNG")
+
+				await navigator.clipboard.write([
+					new ClipboardItem({ "image/png": pngBlob }),
+				])
+
+				toast.success(t("copySuccess"))
+			}, "image/png")
+		} catch (err) {
+			console.error("Failed to copy image:", err)
+			toast.error(t("copyError"))
 		}
 	}
+
+
 
 	return (
 		<div className="dark">
@@ -49,7 +72,7 @@ export default function HomePage() {
 				<Navbar />
 
 				<div className="flex flex-1 min-h-0">
-					{/* Lista de canciones */}
+					{/* canciones */}
 					<div className="w-1/2 border-r border-border bg-card flex flex-col min-h-0">
 						<div className="p-6 border-b border-border shrink-0">
 							<input
@@ -102,7 +125,7 @@ export default function HomePage() {
 						</div>
 					</div>
 
-					{/* Panel derecho con imágenes */}
+					{/* panel imagenes */}
 					<ScrollArea className="w-1/2 bg-card">
 						<div className="p-6 flex flex-col items-center">
 							<AnimatePresence mode="wait">
