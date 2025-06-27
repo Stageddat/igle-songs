@@ -15,5 +15,6 @@
 	"loadSongsError": "加载歌曲时出错",
 	"loadImagesError": "无法加载图片",
 	"copySuccess": "已复制到剪贴板",
-	"copyError": "无法复制"
+	"copyError": "无法复制",
+	"adminPasswordPlaceholder": "密码"
 }

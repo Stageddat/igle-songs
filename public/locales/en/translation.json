@@ -15,5 +15,6 @@
 	"loadSongsError": "Error loading songs",
 	"loadImagesError": "Failed to load images",
 	"copySuccess": "Copied to clipboard",
-	"copyError": "Failed to copy"
+	"copyError": "Failed to copy",
+	"adminPasswordPlaceholder": "Password"
 }

@@ -15,5 +15,6 @@
 	"loadSongsError": "Error al cargar canciones",
 	"loadImagesError": "No se pudieron cargar las imágenes",
 	"copySuccess": "Copiado al portapapeles",
-	"copyError": "No se pudo copiar"
+	"copyError": "No se pudo copiar",
+	"adminPasswordPlaceholder": "Contraseña"
 }

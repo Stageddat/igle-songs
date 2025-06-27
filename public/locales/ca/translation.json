@@ -15,5 +15,6 @@
 	"loadSongsError": "Error al carregar cançons",
 	"loadImagesError": "No s'han pogut carregar les imatges",
 	"copySuccess": "Copiat al portapapeles",
-	"copyError": "No s'ha pogut copiar"
+	"copyError": "No s'ha pogut copiar",
+	"adminPasswordPlaceholder": "Contrasenya"
 }

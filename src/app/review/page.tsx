@@ -16,7 +16,6 @@ export default function SongsDatabase() {
 	const [selectedImages, setSelectedImages] = useState<string[]>([])
 	const [adminPassword, setAdminPassword] = useState("")
 
-	// onClick handler moved to top for easier editing
 	const handleSendSelection = async () => {
 		try {
 			const res = await fetch("/api/filter-review-image", {
@@ -33,7 +32,7 @@ export default function SongsDatabase() {
 
 			if (!res.ok) {
 				const errorData = await res.json()
-				throw new Error(errorData.message || "Server error")
+				throw new Error(errorData.message)
 			}
 
 			toast.success(t("successMessage"))
@@ -53,7 +52,7 @@ export default function SongsDatabase() {
 			.then((res) => res.json())
 			.then(setSongs)
 			.catch((error) => {
-				console.error("Error fetching songs:", error)
+				console.error("error fetching songs:", error)
 				toast.error(t("errorMessage"))
 			})
 	}, [])
@@ -67,7 +66,7 @@ export default function SongsDatabase() {
 					setSelectedImages([])
 				})
 				.catch((error) => {
-					console.error("Error fetching images:", error)
+					console.error("error fetching images:", error)
 					toast.error(t("errorMessage"))
 				})
 		}
@@ -96,7 +95,7 @@ export default function SongsDatabase() {
 							/>
 							<input
 								type="password"
-								placeholder="Admin Password"
+								placeholder={t("adminPasswordPlaceholder")}
 								value={adminPassword}
 								onChange={(e) => setAdminPassword(e.target.value)}
 								className="w-full px-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
