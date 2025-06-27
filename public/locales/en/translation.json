@@ -11,5 +11,9 @@
 	"noImagesFound": "No images found",
 	"sendSelection": "Send selection",
 	"successMessage": "Sent successfully ✅",
-	"errorMessage": "Failed to send ❌"
+	"errorMessage": "Failed to send ❌",
+	"loadSongsError": "Error loading songs",
+	"loadImagesError": "Failed to load images",
+	"copySuccess": "Copied to clipboard",
+	"copyError": "Failed to copy"
 }

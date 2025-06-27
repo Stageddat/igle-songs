@@ -11,5 +11,9 @@
 	"noImagesFound": "No s'han trobat imatges",
 	"sendSelection": "Enviar selecció",
 	"successMessage": "Enviat correctament ✅",
-	"errorMessage": "Error al enviar ❌"
+	"errorMessage": "Error al enviar ❌",
+	"loadSongsError": "Error al carregar cançons",
+	"loadImagesError": "No s'han pogut carregar les imatges",
+	"copySuccess": "Copiat al portapapeles",
+	"copyError": "No s'ha pogut copiar"
 }

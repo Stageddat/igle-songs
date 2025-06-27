@@ -11,5 +11,9 @@
 	"noImagesFound": "No se encontraron imágenes",
 	"sendSelection": "Enviar selección",
 	"successMessage": "Enviado correctamente ✅",
-	"errorMessage": "Error al enviar ❌"
+	"errorMessage": "Error al enviar ❌",
+	"loadSongsError": "Error al cargar canciones",
+	"loadImagesError": "No se pudieron cargar las imágenes",
+	"copySuccess": "Copiado al portapapeles",
+	"copyError": "No se pudo copiar"
 }
