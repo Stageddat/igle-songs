@@ -1,11 +1,9 @@
+import { uploadSlides } from "@/modules/fileManager/uploadSlides";
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { song, slides } = body;
-
-    console.log("📩 Recibido en backend:");
-    console.log("🎵 Canción:", song);
-    console.log("🖼️ Slides:", slides);
 
     if (!song || !Array.isArray(slides)) {
       return new Response(JSON.stringify({ message: "Invalid data" }), {
@@ -13,6 +11,8 @@ export async function POST(req: Request) {
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    await uploadSlides(song, slides);
 
     return new Response(
       JSON.stringify({
