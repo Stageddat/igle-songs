@@ -2,19 +2,33 @@
 
 import { useEffect, useState } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import Navbar from "@/components/navbar"
 import { useTranslation } from "react-i18next"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
+import { ArrowLeft } from "lucide-react"
 
 export default function SongsDatabase() {
 	const [songs, setSongs] = useState<string[]>([])
 	const [searchTerm, setSearchTerm] = useState("")
 	const [selectedSong, setSelectedSong] = useState<string | null>(null)
 	const [images, setImages] = useState<string[]>([])
-	const { t } = useTranslation()
 	const [selectedImages, setSelectedImages] = useState<string[]>([])
 	const [adminPassword, setAdminPassword] = useState("")
+	const [isMobileView, setIsMobileView] = useState(false)
+	const { t } = useTranslation()
+
+	useEffect(() => {
+		const checkMobile = () => {
+			setIsMobileView(window.innerWidth < 768)
+		}
+
+		checkMobile()
+		window.addEventListener('resize', checkMobile)
+		return () => window.removeEventListener('resize', checkMobile)
+	}, [])
 
 	const handleSendSelection = async () => {
 		try {
@@ -72,10 +86,203 @@ export default function SongsDatabase() {
 		}
 	}, [selectedSong, t])
 
-
 	const filteredSongs = songs.filter(song =>
 		song.toLowerCase().includes(searchTerm.toLowerCase())
 	)
+
+	const handleSongSelect = (title: string) => {
+		setSelectedSong(title)
+	}
+
+	const handleBackToList = () => {
+		setSelectedSong(null)
+	}
+
+	const toggleImageSelection = (img: string) => {
+		setSelectedImages((prev) => {
+			if (prev.includes(img)) {
+				return prev.filter(i => i !== img)
+			} else {
+				return [...prev, img]
+			}
+		})
+	}
+
+	if (isMobileView) {
+		return (
+			<div className="dark">
+				<div className="flex flex-col h-screen bg-background text-foreground">
+					<Navbar />
+
+					<div className="flex-1 relative overflow-hidden">
+						<AnimatePresence initial={false}>
+							{/* Song list - always present but moves left when song selected */}
+							<motion.div
+								key="list-view"
+								initial={false}
+								animate={{
+									x: selectedSong ? "-100%" : "0%"
+								}}
+								transition={{
+									type: "spring",
+									stiffness: 400,
+									damping: 40
+								}}
+								className="absolute inset-0 bg-card flex flex-col"
+							>
+								{/* Search and admin password */}
+								<div className="p-4 border-b border-border shrink-0 space-y-3">
+									<Input
+										type="text"
+										placeholder={t("searchPlaceholder")}
+										value={searchTerm}
+										onChange={(e) => setSearchTerm(e.target.value)}
+										className="w-full"
+									/>
+									<Input
+										type="password"
+										placeholder={t("adminPasswordPlaceholder")}
+										value={adminPassword}
+										onChange={(e) => setAdminPassword(e.target.value)}
+										className="w-full"
+									/>
+								</div>
+
+								{/* Song list */}
+								<div className="flex-1 min-h-0">
+									<ScrollArea className="h-full">
+										<motion.div
+											className="space-y-2 p-4"
+											initial={{ opacity: 0 }}
+											animate={{ opacity: 1 }}
+											transition={{ duration: 0.4 }}
+										>
+											<AnimatePresence>
+												{filteredSongs.map((title) => (
+													<motion.div
+														key={title}
+														initial={{ opacity: 0, y: 10 }}
+														animate={{ opacity: 1, y: 0 }}
+														exit={{ opacity: 0, y: -10 }}
+														transition={{ duration: 0.2 }}
+													>
+														<Button
+															variant="ghost"
+															className="w-full justify-start h-auto p-4 text-left font-normal border border-border hover:bg-accent hover:border-accent-foreground/20"
+															onClick={() => handleSongSelect(title)}
+														>
+															<div className="font-medium">{title}</div>
+														</Button>
+													</motion.div>
+												))}
+											</AnimatePresence>
+											{filteredSongs.length === 0 && (
+												<motion.div
+													initial={{ opacity: 0 }}
+													animate={{ opacity: 1 }}
+													className="px-4 py-8 text-muted-foreground text-center"
+												>
+													{t("noSongsFound")}
+												</motion.div>
+											)}
+										</motion.div>
+									</ScrollArea>
+								</div>
+							</motion.div>
+
+							{/* Song detail view - slides in from right */}
+							{selectedSong && (
+								<motion.div
+									key="song-view"
+									initial={{ x: "100%" }}
+									animate={{ x: "0%" }}
+									exit={{ x: "100%" }}
+									transition={{
+										type: "spring",
+										stiffness: 400,
+										damping: 40
+									}}
+									className="absolute inset-0 bg-card flex flex-col"
+								>
+									{/* Header with back button */}
+									<div className="sticky top-0 z-10 bg-card border-b border-border p-4 flex items-center gap-3">
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={handleBackToList}
+											className="shrink-0"
+										>
+											<ArrowLeft size={20} />
+										</Button>
+										<h2 className="text-lg font-bold truncate flex-1">
+											{selectedSong}
+										</h2>
+									</div>
+
+									{/* Send button */}
+									<div className="p-4 border-b border-border">
+										<Button
+											onClick={handleSendSelection}
+											disabled={selectedImages.length === 0}
+											className="w-full bg-green-600 hover:bg-green-700 text-white"
+										>
+											{t("sendSelection")} ({selectedImages.length})
+										</Button>
+									</div>
+
+									{/* Images */}
+									<div className="flex-1 min-h-0">
+										<ScrollArea className="h-full">
+											<div className="p-4">
+												{images.length > 0 ? (
+													<div className="flex flex-col gap-4">
+														{images.map((img) => {
+															const selectedIndex = selectedImages.indexOf(img)
+															const isSelected = selectedIndex !== -1
+
+															return (
+																<div
+																	key={img}
+																	className="relative cursor-pointer"
+																	onClick={() => toggleImageSelection(img)}
+																>
+																	<div className={`relative rounded-xl overflow-hidden border-2 transition-all ${isSelected
+																			? "border-green-500 ring-2 ring-green-500/30"
+																			: "border-border hover:border-accent-foreground/20"
+																		}`}>
+																		<img
+																			src={`/api/review-songs/${selectedSong}/${img}`}
+																			alt={img}
+																			className="w-full rounded-xl shadow-md"
+																		/>
+																		{isSelected && (
+																			<div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full shadow-lg font-medium">
+																				#{selectedIndex + 1}
+																			</div>
+																		)}
+																	</div>
+																</div>
+															)
+														})}
+													</div>
+												) : (
+													<div className="flex items-center justify-center h-64">
+														<p className="text-muted-foreground text-center">
+															{t("noImagesFound")}
+														</p>
+													</div>
+												)}
+											</div>
+										</ScrollArea>
+									</div>
+								</motion.div>
+							)}
+						</AnimatePresence>
+					</div>
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div className="dark">
@@ -83,22 +290,22 @@ export default function SongsDatabase() {
 				<Navbar />
 
 				<div className="flex flex-1 min-h-0">
-					{/* lista de canciones */}
+					{/* Song list */}
 					<div className="w-1/2 border-r border-border bg-card flex flex-col min-h-0">
 						<div className="p-6 border-b border-border shrink-0 space-y-4">
-							<input
+							<Input
 								type="text"
 								placeholder={t("searchPlaceholder")}
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
-								className="w-full px-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+								className="w-full"
 							/>
-							<input
+							<Input
 								type="password"
 								placeholder={t("adminPasswordPlaceholder")}
 								value={adminPassword}
 								onChange={(e) => setAdminPassword(e.target.value)}
-								className="w-full px-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+								className="w-full"
 							/>
 						</div>
 						<div className="flex-1 min-h-0">
@@ -110,22 +317,26 @@ export default function SongsDatabase() {
 									transition={{ duration: 0.4 }}
 								>
 									<AnimatePresence>
-										{filteredSongs.map((title, index) => (
+										{filteredSongs.map((title) => (
 											<motion.div
 												key={title}
 												initial={{ opacity: 0, y: 10 }}
 												animate={{ opacity: 1, y: 0 }}
 												exit={{ opacity: 0, y: -10 }}
 												transition={{ duration: 0.2 }}
-												onClick={() => setSelectedSong(title)}
 												whileHover={{ scale: 1.02 }}
 												whileTap={{ scale: 0.98 }}
-												className={`px-4 py-3 cursor-pointer rounded-lg transition-colors duration-200 border ${selectedSong === title
-													? "bg-primary text-primary-foreground border-primary"
-													: "bg-muted hover:bg-accent border-border hover:border-accent-foreground/20"
-													}`}
 											>
-												{title}
+												<Button
+													variant={selectedSong === title ? "default" : "ghost"}
+													className={`w-full justify-start h-auto p-4 text-left font-normal border ${selectedSong === title
+														? "border-primary"
+														: "border-border hover:border-accent-foreground/20"
+														}`}
+													onClick={() => handleSongSelect(title)}
+												>
+													{title}
+												</Button>
 											</motion.div>
 										))}
 									</AnimatePresence>
@@ -143,7 +354,7 @@ export default function SongsDatabase() {
 						</div>
 					</div>
 
-					{/* panel derecho con potos */}
+					{/* Images panel */}
 					<ScrollArea className="w-1/2 bg-card">
 						<div className="p-6 flex flex-col items-center">
 							<AnimatePresence mode="wait">
@@ -160,16 +371,16 @@ export default function SongsDatabase() {
 											{selectedSong}
 										</h2>
 
-										{/* boton enviar */}
-										<button
+										{/* Send button */}
+										<Button
 											onClick={handleSendSelection}
-											className="mb-6 px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition"
 											disabled={selectedImages.length === 0}
+											className="mb-6 bg-green-600 hover:bg-green-700 text-white px-6 py-2"
 										>
-											{t("sendSelection")}
-										</button>
+											{t("sendSelection")} ({selectedImages.length})
+										</Button>
 
-										{/* galería de elegir */}
+										{/* Image gallery */}
 										{images.length > 0 ? (
 											<div className="flex flex-col items-center gap-6">
 												{images.map((img) => {
@@ -180,27 +391,23 @@ export default function SongsDatabase() {
 														<div
 															key={img}
 															className="relative cursor-pointer"
-															onClick={() => {
-																setSelectedImages((prev) => {
-																	if (isSelected) {
-																		return prev.filter(i => i !== img)
-																	} else {
-																		return [...prev, img]
-																	}
-																})
-															}}
+															onClick={() => toggleImageSelection(img)}
 														>
-															<img
-																src={`/api/review-songs/${selectedSong}/${img}`}
-																alt={img}
-																className={`w-full max-w-[600px] rounded-xl shadow-md border transition-transform ${isSelected ? "ring-4 ring-green-500 scale-[1.02]" : ""
-																	}`}
-															/>
-															{isSelected && (
-																<div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full shadow-lg">
-																	#{selectedIndex + 1}
-																</div>
-															)}
+															<div className={`relative rounded-xl overflow-hidden border-2 transition-all hover:scale-[1.01] ${isSelected
+																	? "border-green-500 ring-4 ring-green-500/30 scale-[1.02]"
+																	: "border-border hover:border-accent-foreground/20"
+																}`}>
+																<img
+																	src={`/api/review-songs/${selectedSong}/${img}`}
+																	alt={img}
+																	className="w-full max-w-[600px] rounded-xl shadow-md"
+																/>
+																{isSelected && (
+																	<div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full shadow-lg font-medium">
+																		#{selectedIndex + 1}
+																	</div>
+																)}
+															</div>
 														</div>
 													)
 												})}
@@ -227,7 +434,6 @@ export default function SongsDatabase() {
 							</AnimatePresence>
 						</div>
 					</ScrollArea>
-
 				</div>
 			</div>
 		</div>
