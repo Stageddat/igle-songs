@@ -15,6 +15,16 @@ export async function uploadSlides(songName: string, slides: string[]) {
   const files = await fs.readdir(songDir);
   const pngFiles = files.filter((file) => file.endsWith(".png"));
 
+  // poner orden canciones repetidas
+  let finalSongName = songName;
+  let counter = 2;
+
+  // verificar si ya existe cancion
+  while (songsDb.songs && songsDb.songs[finalSongName]) {
+    finalSongName = `${songName}-${counter}`;
+    counter++;
+  }
+
   // limpiar archivos no usados
   for (const file of pngFiles) {
     if (!slides.includes(file)) {
@@ -27,7 +37,7 @@ export async function uploadSlides(songName: string, slides: string[]) {
   for (let i = 0; i < slides.length; i++) {
     const originalName = slides[i];
     const oldPath = path.join(songDir, originalName);
-    const newName = `${songName}-${i}.png`;
+    const newName = `${finalSongName}-${i}.png`; // usar finalSongName con sufijo para evitar conflictos
     const newPath = path.join(songDir, newName);
 
     try {
@@ -70,16 +80,6 @@ export async function uploadSlides(songName: string, slides: string[]) {
   }
 
   console.log(uploadedLinks);
-
-  // poner orden canciones repetidas
-  let finalSongName = songName;
-  let counter = 2;
-
-  // verificar si ya existe cancion
-  while (songsDb.songs && songsDb.songs[finalSongName]) {
-    finalSongName = `${songName}-${counter}`;
-    counter++;
-  }
 
   const nowDate = new Date().toISOString();
 
