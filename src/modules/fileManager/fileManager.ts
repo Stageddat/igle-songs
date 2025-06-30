@@ -10,6 +10,30 @@ const pptxsDir = path.join(process.cwd(), "/data/pptxs");
 const pdfsDir = path.join(process.cwd(), "/data/pdfs");
 const pngsDir = path.join(process.cwd(), "/data/pngs");
 
+const CONCURRENCY_LIMIT = 3;
+
+async function runInBatches<T>(
+  items: T[],
+  limit: number,
+  asyncFn: (item: T) => Promise<void>
+) {
+  let index = 0;
+
+  async function worker() {
+    while (index < items.length) {
+      const i = index++;
+      try {
+        await asyncFn(items[i]);
+      } catch (err) {
+        console.error(`Error processing item: ${items[i]}`, err);
+      }
+    }
+  }
+
+  const workers = Array(limit).fill(null).map(worker);
+  await Promise.all(workers);
+}
+
 export async function processFiles() {
   await checkDir();
   console.log("processing files...");
@@ -17,7 +41,7 @@ export async function processFiles() {
   // procesar todos los pptx disponibles
   const pptxFiles = await fs.readdir(pptxsDir);
 
-  for (const file of pptxFiles) {
+  await runInBatches(pptxFiles, CONCURRENCY_LIMIT, async (file) => {
     if (await isDiskAlmostFull()) {
       console.warn("espace almost full. waiting...");
       return;
@@ -27,28 +51,25 @@ export async function processFiles() {
     if (!song) {
       console.log(`eliminando archivo no canción: ${file}`);
       await fs.unlink(path.join(pptxsDir, file));
-      continue;
+      return;
     }
 
     const pptxPath = path.join(pptxsDir, file);
     const baseName = path.parse(pptxPath).name;
-    const pdfFile = path.join(pdfsDir, `${baseName}.pdf`);
 
-    // convertir pptx a pdf
     await convertPptxToPdf(pptxPath, pdfsDir);
 
-    // eliminar pptx inmediatamente
     try {
       await fs.unlink(pptxPath);
     } catch (error: unknown) {
       console.error(`failed to delete ${pptxPath}:`, error);
     }
-  }
+  });
 
   // procesar todos los pdfs disponibles
   const pdfFiles = await fs.readdir(pdfsDir);
 
-  for (const file of pdfFiles) {
+  await runInBatches(pdfFiles, CONCURRENCY_LIMIT, async (file) => {
     if (await isDiskAlmostFull()) {
       console.warn("espace almost full. waiting...");
       return;
@@ -61,15 +82,16 @@ export async function processFiles() {
     console.log(songNames);
     if (!songNames) {
       console.error(`failed to get song names: ${baseName}`);
-      continue;
+      return;
     }
 
-    const tempPngDir = path.join(pngsDir, "temp");
+    // crear subcarpeta temp específica por archivo pdf
+    const tempPngDir = path.join(pngsDir, "temp", baseName);
     const pngImages = await convertPdfToPng(pdfFile, tempPngDir);
 
     if (pngImages.length === 0) {
       console.error(`failed to convert pdf to png: ${baseName}`);
-      continue;
+      return;
     }
 
     for (const songName of songNames) {
@@ -118,7 +140,7 @@ export async function processFiles() {
       }
     }
 
-    // limpiar dir temp
+    // limpiar subcarpeta temporal especifica
     try {
       for (const pngImage of pngImages) {
         await fs.unlink(pngImage);
@@ -128,11 +150,10 @@ export async function processFiles() {
       console.error(`failed to clean temp dir:`, error);
     }
 
-    // eliminar pdf inmediatamente
     try {
       await fs.unlink(pdfFile);
     } catch (error: unknown) {
       console.error(`failed to delete ${pdfFile}:`, error);
     }
-  }
+  });
 }
