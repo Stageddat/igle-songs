@@ -1,13 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import MasterDetailLayout from "@/components/layout/MasterDetailLayout"
 import TwoPanelLayout from "@/components/layout/TwoPanelLayout"
 import ImageGallery from "@/components/ImageGallery"
 import { useMobileView } from "@/hooks/useMobileView"
 import SongList from "@/components/SongList"
+import { useTranslations } from 'next-intl';
 
 export default function HomePage() {
 	const [songs, setSongs] = useState<string[]>([])
@@ -16,7 +16,7 @@ export default function HomePage() {
 	const [images, setImages] = useState<string[]>([])
 	const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
 	const isMobileView = useMobileView()
-	const { t } = useTranslation()
+	const t = useTranslations()
 
 	useEffect(() => {
 		fetch("/api/songs")

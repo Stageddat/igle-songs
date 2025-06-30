@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useTransition } from "react";
 import {
 	NavigationMenu,
 	NavigationMenuLink,
@@ -21,35 +21,34 @@ import {
 }
 	from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useTranslation } from "react-i18next";
-import i18n from "@/i18n";
+import { useTranslations, useLocale } from 'next-intl';
 import { Menu, Globe, ChevronDown } from "lucide-react";
+import { setUserLocale } from "@/hooks/useLocale";
+import { Locale } from "@/i18n/config";
 
 export default function Navbar() {
-	const { t } = useTranslation();
+	const t = useTranslations();
+	const currentLocale = useLocale();
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-	const [currentLang, setCurrentLang] = useState("");
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-	useEffect(() => {
-		setCurrentLang(i18n.language);
-	}, []);
+	const [isPending, startTransition] = useTransition();
 
 	const languages = [
-		{ code: "es", name: "Español" },
-		{ code: "en", name: "English" },
-		{ code: "ca", name: "Català" },
-		{ code: "ch", name: "中文" },
+		{ code: "es" as Locale, name: "Español" },
+		{ code: "en" as Locale, name: "English" },
+		{ code: "ca" as Locale, name: "Català" },
+		{ code: "ch" as Locale, name: "中文" },
 	];
 
-	const handleLanguageChange = (newLocale: string) => {
-		i18n.changeLanguage(newLocale);
-		localStorage.setItem("i18nextLng", newLocale);
-		setCurrentLang(newLocale);
+	const handleLanguageChange = (newLocale: Locale) => {
+		startTransition(async () => {
+			await setUserLocale(newLocale);
+		});
 		setIsDropdownOpen(false);
 	};
+
 	return (
-		<div className="flex justify-between items-center px-4 sm:px-6 py-4 bg-zinc-950 border-b border-zinc-800 shadow-lg">
+		<div className="flex justify-between items-center px-4 sm:px-6 py-4 bg-stone-950 border-b border-zinc-800 shadow-lg">
 			<h1 className="text-xl sm:text-2xl font-semibold text-zinc-100">
 				{t("navTitle")}
 			</h1>
@@ -74,10 +73,11 @@ export default function Navbar() {
 					<DropdownMenuTrigger asChild>
 						<Button
 							variant="outline"
-							className="bg-zinc-800 text-zinc-50 hover:bg-zinc-700 border-zinc-700 hover:border-zinc-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md shadow-sm"
+							disabled={isPending}
+							className="bg-zinc-800 text-zinc-50 hover:bg-zinc-700 border-zinc-700 hover:border-zinc-600 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md shadow-sm disabled:opacity-50"
 						>
 							<Globe className="w-4 h-4 mr-2 text-zinc-300" />
-							{languages.find(lang => lang.code === currentLang)?.name}
+							{languages.find(lang => lang.code === currentLocale)?.name || "Language"}
 							<ChevronDown className="w-4 h-4 ml-2 text-zinc-300" />
 						</Button>
 					</DropdownMenuTrigger>
@@ -89,9 +89,11 @@ export default function Navbar() {
 							<DropdownMenuItem
 								key={lang.code}
 								onClick={() => handleLanguageChange(lang.code)}
-								className={currentLang === lang.code ? "bg-zinc-700 text-zinc-50 rounded-sm" : "hover:bg-zinc-700 hover:text-zinc-50 rounded-sm"}
+								disabled={isPending}
+								className={currentLocale === lang.code ? "bg-zinc-700 text-zinc-50 rounded-sm" : "hover:bg-zinc-700 hover:text-zinc-50 rounded-sm"}
 							>
 								{lang.name}
+								{isPending && currentLocale === lang.code && " (switching...)"}
 							</DropdownMenuItem>
 						))}
 					</DropdownMenuContent>
@@ -149,11 +151,12 @@ export default function Navbar() {
 									<DropdownMenuTrigger asChild>
 										<Button
 											variant="outline"
-											className="w-full justify-between bg-zinc-800 text-zinc-50 border-zinc-700 hover:bg-zinc-700 hover:text-zinc-50 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md shadow-sm"
+											disabled={isPending}
+											className="w-full justify-between bg-zinc-800 text-zinc-50 border-zinc-700 hover:bg-zinc-700 hover:text-zinc-50 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md shadow-sm disabled:opacity-50"
 										>
 											<div className="flex items-center">
 												<Globe className="w-4 h-4 mr-2 text-zinc-300" />
-												{languages.find(lang => lang.code === currentLang)?.name}
+												{languages.find(lang => lang.code === currentLocale)?.name || "Language"}
 											</div>
 											<ChevronDown className="w-4 h-4 text-zinc-300" />
 										</Button>
@@ -166,9 +169,11 @@ export default function Navbar() {
 											<DropdownMenuItem
 												key={lang.code}
 												onClick={() => handleLanguageChange(lang.code)}
-												className={currentLang === lang.code ? "bg-zinc-700 text-zinc-50 rounded-sm" : "hover:bg-zinc-700 hover:text-zinc-50 rounded-sm"}
+												disabled={isPending}
+												className={currentLocale === lang.code ? "bg-zinc-700 text-zinc-50 rounded-sm" : "hover:bg-zinc-700 hover:text-zinc-50 rounded-sm"}
 											>
 												{lang.name}
+												{isPending && " (switching...)"}
 											</DropdownMenuItem>
 										))}
 									</DropdownMenuContent>

@@ -3,7 +3,7 @@
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
-import { useTranslation } from "react-i18next"
+import { useTranslations } from 'next-intl';
 
 interface ImageGalleryProps {
 	selectedSong: string | null
@@ -26,7 +26,7 @@ export default function ImageGallery({
 	actionButton,
 	isMobile = false
 }: ImageGalleryProps) {
-	const { t } = useTranslation()
+	const t = useTranslations()
 
 	const contentClass = isMobile ? "p-4" : "p-6"
 
@@ -40,7 +40,7 @@ export default function ImageGallery({
 					</div>
 				)}
 
-				{/* Images */}
+				{/* potos */}
 				<div className="flex-1 min-h-0">
 					<ScrollArea className="h-full">
 						<div className={contentClass}>
@@ -57,8 +57,8 @@ export default function ImageGallery({
 												onClick={() => onImageClick(img)}
 											>
 												<div className={`relative rounded-xl overflow-hidden border-2 transition-all ${isSelected
-														? "border-green-500 ring-2 ring-green-500/30"
-														: "border-border hover:border-accent-foreground/20"
+													? "border-green-500 ring-2 ring-green-500/30"
+													: "border-border hover:border-accent-foreground/20"
 													}`}>
 													<img
 														src={getImageUrl(img)}
@@ -106,7 +106,7 @@ export default function ImageGallery({
 							{selectedSong}
 						</h2>
 
-						{/* Action button for desktop */}
+						{/* boton de accion pc */}
 						{actionButton && (
 							<div className="mb-6">
 								{actionButton}
@@ -126,8 +126,8 @@ export default function ImageGallery({
 											onClick={() => onImageClick(img)}
 										>
 											<div className={`relative rounded-xl overflow-hidden border-2 transition-all hover:scale-[1.01] ${isSelected
-													? "border-green-500 ring-4 ring-green-500/30 scale-[1.02]"
-													: "border-border hover:border-accent-foreground/20"
+												? "border-green-500 ring-4 ring-green-500/30 scale-[1.02]"
+												: "border-border hover:border-accent-foreground/20"
 												}`}>
 												<img
 													src={getImageUrl(img)}

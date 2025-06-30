@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion, AnimatePresence } from "framer-motion"
-import { useTranslation } from "react-i18next"
+import { useTranslations } from 'next-intl';
 
 interface SongListProps {
 	songs: string[]
@@ -26,7 +26,7 @@ export default function SongList({
 	headerContent,
 	isMobile = false
 }: SongListProps) {
-	const { t } = useTranslation()
+	const t = useTranslations()
 
 	const filteredSongs = songs.filter(song =>
 		song.toLowerCase().includes(searchTerm.toLowerCase())
@@ -72,8 +72,8 @@ export default function SongList({
 									<Button
 										variant={selectedSong === title ? "default" : "ghost"}
 										className={`w-full justify-start h-auto p-4 text-left font-normal border ${selectedSong === title
-												? "border-primary"
-												: "border-border hover:bg-accent hover:border-accent-foreground/20"
+											? "border-primary"
+											: "border-border hover:bg-accent hover:border-accent-foreground/20"
 											}`}
 										onClick={() => onSongSelect(title)}
 									>

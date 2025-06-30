@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Navbar from "@/components/navbar"
-import { useTranslation } from "react-i18next"
+import { useTranslations } from "next-intl"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import { ArrowLeft } from "lucide-react"
@@ -18,7 +18,7 @@ export default function SongsDatabase() {
 	const [selectedImages, setSelectedImages] = useState<string[]>([])
 	const [adminPassword, setAdminPassword] = useState("")
 	const [isMobileView, setIsMobileView] = useState(false)
-	const { t } = useTranslation()
+	const t = useTranslations()
 
 	useEffect(() => {
 		const checkMobile = () => {
@@ -247,8 +247,8 @@ export default function SongsDatabase() {
 																	onClick={() => toggleImageSelection(img)}
 																>
 																	<div className={`relative rounded-xl overflow-hidden border-2 transition-all ${isSelected
-																			? "border-green-500 ring-2 ring-green-500/30"
-																			: "border-border hover:border-accent-foreground/20"
+																		? "border-green-500 ring-2 ring-green-500/30"
+																		: "border-border hover:border-accent-foreground/20"
 																		}`}>
 																		<img
 																			src={`/api/review-songs/${selectedSong}/${img}`}
@@ -394,8 +394,8 @@ export default function SongsDatabase() {
 															onClick={() => toggleImageSelection(img)}
 														>
 															<div className={`relative rounded-xl overflow-hidden border-2 transition-all hover:scale-[1.01] ${isSelected
-																	? "border-green-500 ring-4 ring-green-500/30 scale-[1.02]"
-																	: "border-border hover:border-accent-foreground/20"
+																? "border-green-500 ring-4 ring-green-500/30 scale-[1.02]"
+																: "border-border hover:border-accent-foreground/20"
 																}`}>
 																<img
 																	src={`/api/review-songs/${selectedSong}/${img}`}
