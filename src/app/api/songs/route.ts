@@ -8,7 +8,7 @@ export async function GET() {
     const fileContent = await fs.readFile(filePath, "utf-8");
     const raw = JSON.parse(fileContent);
 
-    const songs = raw.songsList.map((item: any) => Object.keys(item)[0]);
+    const songs = raw.songs ? Object.keys(raw.songs) : [];
 
     return NextResponse.json(songs);
   } catch (error: unknown) {
