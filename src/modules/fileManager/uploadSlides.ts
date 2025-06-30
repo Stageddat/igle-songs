@@ -3,17 +3,19 @@ import path from "node:path";
 import { r2 } from "@/r2";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import dotenv from "dotenv";
-import songsDb from "../../../data/songs.json";
 
 dotenv.config();
 
 export async function uploadSlides(songName: string, slides: string[]) {
+  const songsDbPath = path.join(process.cwd(), "data", "songs.json");
+  const songsDbContent = await fs.readFile(songsDbPath, "utf-8");
+  const songsDb = JSON.parse(songsDbContent);
   const pngsDir = path.join(process.cwd(), "/data/pngs");
   const songDir = path.join(pngsDir, songName);
-
   const files = await fs.readdir(songDir);
   const pngFiles = files.filter((file) => file.endsWith(".png"));
 
+  // limpiar archivos no usados
   for (const file of pngFiles) {
     if (!slides.includes(file)) {
       const filePath = path.join(songDir, file);
@@ -21,6 +23,7 @@ export async function uploadSlides(songName: string, slides: string[]) {
     }
   }
 
+  // renombrar archivos en orden
   for (let i = 0; i < slides.length; i++) {
     const originalName = slides[i];
     const oldPath = path.join(songDir, originalName);
@@ -46,9 +49,11 @@ export async function uploadSlides(songName: string, slides: string[]) {
 
   const uploadedLinks: string[] = [];
 
+  // subir archivos a r2
   for (const file of uploadSlides) {
     const filePath = path.join(songDir, file);
     const fileContent = await fs.readFile(filePath);
+
     await r2.send(
       new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME!,
@@ -61,25 +66,35 @@ export async function uploadSlides(songName: string, slides: string[]) {
     const publicUrl = `${process.env.R2_PUBLIC_URL}/${encodeURIComponent(
       file
     )}`;
-
     uploadedLinks.push(publicUrl);
   }
 
   console.log(uploadedLinks);
+
+  // poner orden canciones repetidas
+  let finalSongName = songName;
+  let counter = 2;
+
+  // verificar si ya existe cancion
+  while (songsDb.songs && songsDb.songs[finalSongName]) {
+    finalSongName = `${songName}-${counter}`;
+    counter++;
+  }
+
   const nowDate = new Date().toISOString();
 
-  const newSong = {
-    [songName]: {
+  const updatedSongs = {
+    ...songsDb.songs,
+    [finalSongName]: {
       links: uploadedLinks,
+      uploadDate: nowDate,
     },
   };
-
-  console.log(newSong);
 
   const newSongDb = {
     ...songsDb,
     updateDate: nowDate,
-    songsList: [...songsDb.songsList, newSong],
+    songs: updatedSongs,
   };
 
   await fs.writeFile(
@@ -88,8 +103,12 @@ export async function uploadSlides(songName: string, slides: string[]) {
     "utf-8"
   );
 
-  // borrar carpeta
+  // borrar carpeta temporal
   await fs.rm(songDir, { recursive: true, force: true });
 
-  return uploadSlides;
+  return {
+    songName: finalSongName,
+    slides: uploadSlides,
+    links: uploadedLinks,
+  };
 }

@@ -10,6 +10,7 @@ export async function isDiskAlmostFull(threshold = 95): Promise<boolean> {
 
     if (usageMatch) {
       const usedPercentage = parseInt(usageMatch[1], 10);
+      console.log("disk usage: ", usedPercentage, "% / 100%");
       return usedPercentage >= threshold;
     }
 
