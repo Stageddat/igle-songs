@@ -8,7 +8,7 @@ import Navbar from "@/components/navbar"
 import { useTranslations } from "next-intl"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 
 export default function SongsDatabase() {
 	const [songs, setSongs] = useState<string[]>([])
@@ -18,6 +18,7 @@ export default function SongsDatabase() {
 	const [selectedImages, setSelectedImages] = useState<string[]>([])
 	const [adminPassword, setAdminPassword] = useState("")
 	const [isMobileView, setIsMobileView] = useState(false)
+	const [isLoading, setIsLoading] = useState(false)
 	const t = useTranslations()
 
 	useEffect(() => {
@@ -31,6 +32,9 @@ export default function SongsDatabase() {
 	}, [])
 
 	const handleSendSelection = async () => {
+		if (isLoading) return
+
+		setIsLoading(true)
 		try {
 			const res = await fetch("/api/filter-review-image", {
 				method: "POST",
@@ -58,6 +62,8 @@ export default function SongsDatabase() {
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : t("errorMessage"))
 			console.error("failed sending:", error)
+		} finally {
+			setIsLoading(false)
 		}
 	}
 
@@ -116,7 +122,6 @@ export default function SongsDatabase() {
 
 					<div className="flex-1 relative overflow-hidden">
 						<AnimatePresence initial={false}>
-							{/* Song list - always present but moves left when song selected */}
 							<motion.div
 								key="list-view"
 								initial={false}
@@ -130,7 +135,6 @@ export default function SongsDatabase() {
 								}}
 								className="absolute inset-0 bg-card flex flex-col"
 							>
-								{/* Search and admin password */}
 								<div className="p-4 border-b border-border shrink-0 space-y-3">
 									<Input
 										type="text"
@@ -148,7 +152,6 @@ export default function SongsDatabase() {
 									/>
 								</div>
 
-								{/* Song list */}
 								<div className="flex-1 min-h-0">
 									<ScrollArea className="h-full">
 										<motion.div
@@ -190,7 +193,6 @@ export default function SongsDatabase() {
 								</div>
 							</motion.div>
 
-							{/* Song detail view - slides in from right */}
 							{selectedSong && (
 								<motion.div
 									key="song-view"
@@ -204,7 +206,6 @@ export default function SongsDatabase() {
 									}}
 									className="absolute inset-0 bg-card flex flex-col"
 								>
-									{/* Header with back button */}
 									<div className="sticky top-0 z-10 bg-card border-b border-border p-4 flex items-center gap-3">
 										<Button
 											variant="ghost"
@@ -219,21 +220,9 @@ export default function SongsDatabase() {
 										</h2>
 									</div>
 
-									{/* Send button */}
-									<div className="p-4 border-b border-border">
-										<Button
-											onClick={handleSendSelection}
-											disabled={selectedImages.length === 0}
-											className="w-full bg-green-600 hover:bg-green-700 text-white"
-										>
-											{t("sendSelection")} ({selectedImages.length})
-										</Button>
-									</div>
-
-									{/* Images */}
 									<div className="flex-1 min-h-0">
 										<ScrollArea className="h-full">
-											<div className="p-4">
+											<div className="p-4 pb-20">
 												{images.length > 0 ? (
 													<div className="flex flex-col gap-4">
 														{images.map((img) => {
@@ -275,6 +264,35 @@ export default function SongsDatabase() {
 											</div>
 										</ScrollArea>
 									</div>
+
+									<AnimatePresence>
+										{selectedImages.length > 0 && (
+											<motion.div
+												initial={{ y: 100, opacity: 0 }}
+												animate={{ y: 0, opacity: 1 }}
+												exit={{ y: 100, opacity: 0 }}
+												transition={{ duration: 0.3 }}
+												className="fixed bottom-6 left-4 right-4 z-20"
+											>
+												<Button
+													onClick={handleSendSelection}
+													disabled={isLoading}
+													className="w-full bg-green-600 hover:bg-green-700 text-white shadow-lg border border-green-500/30 backdrop-blur-sm"
+												>
+													{isLoading ? (
+														<>
+															<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+															{t("sending")}
+														</>
+													) : (
+														<>
+															{t("sendSelection")} ({selectedImages.length})
+														</>
+													)}
+												</Button>
+											</motion.div>
+										)}
+									</AnimatePresence>
 								</motion.div>
 							)}
 						</AnimatePresence>
@@ -290,7 +308,6 @@ export default function SongsDatabase() {
 				<Navbar />
 
 				<div className="flex flex-1 min-h-0">
-					{/* Song list */}
 					<div className="w-1/2 border-r border-border bg-card flex flex-col min-h-0">
 						<div className="p-6 border-b border-border shrink-0 space-y-4">
 							<Input
@@ -354,86 +371,106 @@ export default function SongsDatabase() {
 						</div>
 					</div>
 
-					{/* Images panel */}
-					<ScrollArea className="w-1/2 bg-card">
-						<div className="p-6 flex flex-col items-center">
-							<AnimatePresence mode="wait">
-								{selectedSong ? (
-									<motion.div
-										key={selectedSong}
-										initial={{ opacity: 0, y: 20 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -10 }}
-										transition={{ duration: 0.4 }}
-										className="w-full flex flex-col items-center"
-									>
-										<h2 className="text-2xl font-bold mb-4 text-center">
-											{selectedSong}
-										</h2>
-
-										{/* Send button */}
-										<Button
-											onClick={handleSendSelection}
-											disabled={selectedImages.length === 0}
-											className="mb-6 bg-green-600 hover:bg-green-700 text-white px-6 py-2"
+					<div className="w-1/2 bg-card relative">
+						<ScrollArea className="h-full">
+							<div className="p-6 flex flex-col items-center pb-24">
+								<AnimatePresence mode="wait">
+									{selectedSong ? (
+										<motion.div
+											key={selectedSong}
+											initial={{ opacity: 0, y: 20 }}
+											animate={{ opacity: 1, y: 0 }}
+											exit={{ opacity: 0, y: -10 }}
+											transition={{ duration: 0.4 }}
+											className="w-full flex flex-col items-center"
 										>
-											{t("sendSelection")} ({selectedImages.length})
-										</Button>
+											<h2 className="text-2xl font-bold mb-6 text-center">
+												{selectedSong}
+											</h2>
 
-										{/* Image gallery */}
-										{images.length > 0 ? (
-											<div className="flex flex-col items-center gap-6">
-												{images.map((img) => {
-													const selectedIndex = selectedImages.indexOf(img)
-													const isSelected = selectedIndex !== -1
+											{images.length > 0 ? (
+												<div className="flex flex-col items-center gap-6">
+													{images.map((img) => {
+														const selectedIndex = selectedImages.indexOf(img)
+														const isSelected = selectedIndex !== -1
 
-													return (
-														<div
-															key={img}
-															className="relative cursor-pointer"
-															onClick={() => toggleImageSelection(img)}
-														>
-															<div className={`relative rounded-xl overflow-hidden border-2 transition-all hover:scale-[1.01] ${isSelected
-																? "border-green-500 ring-4 ring-green-500/30 scale-[1.02]"
-																: "border-border hover:border-accent-foreground/20"
-																}`}>
-																<img
-																	src={`/api/review-songs/${selectedSong}/${img}`}
-																	alt={img}
-																	className="w-full max-w-[600px] rounded-xl shadow-md"
-																/>
-																{isSelected && (
-																	<div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full shadow-lg font-medium">
-																		#{selectedIndex + 1}
-																	</div>
-																)}
+														return (
+															<div
+																key={img}
+																className="relative cursor-pointer"
+																onClick={() => toggleImageSelection(img)}
+															>
+																<div className={`relative rounded-xl overflow-hidden border-2 transition-all hover:scale-[1.01] ${isSelected
+																	? "border-green-500 ring-4 ring-green-500/30 scale-[1.02]"
+																	: "border-border hover:border-accent-foreground/20"
+																	}`}>
+																	<img
+																		src={`/api/review-songs/${selectedSong}/${img}`}
+																		alt={img}
+																		className="w-full max-w-[600px] rounded-xl shadow-md"
+																	/>
+																	{isSelected && (
+																		<div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full shadow-lg font-medium">
+																			#{selectedIndex + 1}
+																		</div>
+																	)}
+																</div>
 															</div>
-														</div>
-													)
-												})}
-											</div>
-										) : (
-											<p className="text-muted-foreground">
-												{t("noImagesFound")}
+														)
+													})}
+												</div>
+											) : (
+												<p className="text-muted-foreground">
+													{t("noImagesFound")}
+												</p>
+											)}
+										</motion.div>
+									) : (
+										<motion.div
+											key="placeholder"
+											initial={{ opacity: 0 }}
+											animate={{ opacity: 1 }}
+											exit={{ opacity: 0 }}
+											className="text-center"
+										>
+											<p className="text-muted-foreground text-lg">
+												{t("selectSong")}
 											</p>
-										)}
-									</motion.div>
-								) : (
-									<motion.div
-										key="placeholder"
-										initial={{ opacity: 0 }}
-										animate={{ opacity: 1 }}
-										exit={{ opacity: 0 }}
-										className="text-center"
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</div>
+						</ScrollArea>
+
+						<AnimatePresence>
+							{selectedSong && selectedImages.length > 0 && (
+								<motion.div
+									initial={{ y: 100, opacity: 0 }}
+									animate={{ y: 0, opacity: 1 }}
+									exit={{ y: 100, opacity: 0 }}
+									transition={{ duration: 0.3 }}
+									className="absolute bottom-6 left-6 right-6 z-20"
+								>
+									<Button
+										onClick={handleSendSelection}
+										disabled={isLoading}
+										className="w-full bg-green-600 hover:bg-green-700 text-white shadow-lg border border-green-500/30 backdrop-blur-sm px-6 py-3"
 									>
-										<p className="text-muted-foreground text-lg">
-											{t("selectSong")}
-										</p>
-									</motion.div>
-								)}
-							</AnimatePresence>
-						</div>
-					</ScrollArea>
+										{isLoading ? (
+											<>
+												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+												{t("sending")}
+											</>
+										) : (
+											<>
+												{t("sendSelection")} ({selectedImages.length})
+											</>
+										)}
+									</Button>
+								</motion.div>
+							)}
+						</AnimatePresence>
+					</div>
 				</div>
 			</div>
 		</div>
