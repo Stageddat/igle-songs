@@ -5,6 +5,7 @@
 	"navDescription": "Christian songs database",
 	"navSong": "Songs",
 	"navReview": "Review",
+	"navAddSong": "Add",
 	"navLanguage": "Language",
 	"searchPlaceholder": "Search song",
 	"noSongsFound": "No songs found",

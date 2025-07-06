@@ -67,6 +67,12 @@ export default function Navbar() {
 					>
 						{t("navReview")}
 					</NavigationMenuLink>
+					<NavigationMenuLink
+						href="/addSong"
+						className="text-lg font-medium text-zinc-100 hover:bg-zinc-800 hover:text-zinc-50 transition px-3 py-2 rounded-md"
+					>
+						{t("navAddSong")}
+					</NavigationMenuLink>
 				</NavigationMenu>
 
 				<DropdownMenu>

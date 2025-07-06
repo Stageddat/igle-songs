@@ -5,6 +5,7 @@
 	"navDescription": "基督教圣诗数据库",
 	"navSong": "歌曲",
 	"navReview": "审查",
+	"navAddSong": "添加",
 	"navLanguage": "语言",
 	"searchPlaceholder": "搜索歌曲",
 	"noSongsFound": "未找到歌曲",
