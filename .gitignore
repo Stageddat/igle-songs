@@ -1,4 +1,6 @@
-/data
+/data/*
+!/data/songs.json
+
 
 # dependencies
 /node_modules
