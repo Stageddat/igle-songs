@@ -8,7 +8,7 @@ import Navbar from "@/components/navbar"
 import { useTranslations } from "next-intl"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react"
 
 export default function SongsDatabase() {
 	const [songs, setSongs] = useState<string[]>([])
@@ -19,6 +19,7 @@ export default function SongsDatabase() {
 	const [adminPassword, setAdminPassword] = useState("")
 	const [isMobileView, setIsMobileView] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
+	const [deletingSong, setDeletingSong] = useState<string | null>(null)
 	const t = useTranslations()
 
 	useEffect(() => {
@@ -64,6 +65,50 @@ export default function SongsDatabase() {
 			console.error("failed sending:", error)
 		} finally {
 			setIsLoading(false)
+		}
+	}
+
+	const handleDeleteSong = async (songToDelete: string) => {
+		if (!adminPassword) {
+			toast.error(t("adminPasswordRequired"))
+			return
+		}
+
+		if (deletingSong === songToDelete) return
+
+		setDeletingSong(songToDelete)
+		try {
+			const res = await fetch("/api/delete-review-songs", {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${adminPassword}`,
+				},
+				body: JSON.stringify({
+					song: songToDelete,
+				}),
+			})
+
+			if (!res.ok) {
+				const errorData = await res.json()
+				throw new Error(errorData.message)
+			}
+
+			toast.success(t("songDeletedSuccess"))
+
+			setSongs((prev) => prev.filter((s) => s !== songToDelete))
+
+			// Si la canción eliminada era la seleccionada, limpiar la selección
+			if (selectedSong === songToDelete) {
+				setSelectedSong(null)
+				setImages([])
+				setSelectedImages([])
+			}
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : t("deleteErrorMessage"))
+			console.error("failed deleting:", error)
+		} finally {
+			setDeletingSong(null)
 		}
 	}
 
@@ -168,13 +213,27 @@ export default function SongsDatabase() {
 														animate={{ opacity: 1, y: 0 }}
 														exit={{ opacity: 0, y: -10 }}
 														transition={{ duration: 0.2 }}
+														className="flex gap-2"
 													>
 														<Button
 															variant="ghost"
-															className="w-full justify-start h-auto p-4 text-left font-normal border border-border hover:bg-accent hover:border-accent-foreground/20"
+															className="flex-1 justify-start h-auto p-4 text-left font-normal border border-border hover:bg-accent hover:border-accent-foreground/20"
 															onClick={() => handleSongSelect(title)}
 														>
 															<div className="font-medium">{title}</div>
+														</Button>
+														<Button
+															variant="ghost"
+															size="icon"
+															onClick={() => handleDeleteSong(title)}
+															disabled={deletingSong === title}
+															className="h-auto p-4 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 border border-border hover:border-red-300 dark:hover:border-red-800"
+														>
+															{deletingSong === title ? (
+																<Loader2 className="h-4 w-4 animate-spin" />
+															) : (
+																<Trash2 className="h-4 w-4" />
+															)}
 														</Button>
 													</motion.div>
 												))}
@@ -343,16 +402,30 @@ export default function SongsDatabase() {
 												transition={{ duration: 0.2 }}
 												whileHover={{ scale: 1.02 }}
 												whileTap={{ scale: 0.98 }}
+												className="flex gap-2"
 											>
 												<Button
 													variant={selectedSong === title ? "default" : "ghost"}
-													className={`w-full justify-start h-auto p-4 text-left font-normal border ${selectedSong === title
+													className={`flex-1 justify-start h-auto p-4 text-left font-normal border ${selectedSong === title
 														? "border-primary"
 														: "border-border hover:border-accent-foreground/20"
 														}`}
 													onClick={() => handleSongSelect(title)}
 												>
 													{title}
+												</Button>
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => handleDeleteSong(title)}
+													disabled={deletingSong === title}
+													className="h-auto p-4 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 border border-border hover:border-red-300 dark:hover:border-red-800"
+												>
+													{deletingSong === title ? (
+														<Loader2 className="h-4 w-4 animate-spin" />
+													) : (
+														<Trash2 className="h-4 w-4" />
+													)}
 												</Button>
 											</motion.div>
 										))}
