@@ -363,7 +363,7 @@ export default function SongsDatabase() {
 
 	return (
 		<div className="dark">
-			<div className="flex flex-col h-screen bg-background text-foreground">
+			<div className="flex flex-col h-screen bg-card text-foreground">
 				<Navbar />
 
 				<div className="flex flex-1 min-h-0">
