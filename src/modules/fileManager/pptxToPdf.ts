@@ -14,7 +14,7 @@ export async function convertPptxToPdf(pptxPath: string, outputDir: string) {
     console.log(`pdf generated: ${pdfPath}`);
     return pdfPath;
   } catch (e) {
-    console.error(`failed to convert ${pptxPath} to pdf: ${e}`);
+    console.error(`failed to convert ${pptxPath} to pdf:`, e);
     return "";
   }
 }
