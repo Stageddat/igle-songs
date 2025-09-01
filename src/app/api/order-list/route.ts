@@ -1,27 +1,35 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-// esta mierda no furula bro
-
 export async function POST(req: Request) {
-  return new Response(JSON.stringify({ error: "not implemented" }));
-
   try {
     const filePath = path.resolve(process.cwd(), "data/songs.json");
 
     const data = await fs.readFile(filePath, "utf-8");
-    const songs = JSON.parse(data) as Record<string, any>;
+    const json = JSON.parse(data) as {
+      updateDate: string;
+      songs: Record<string, any>;
+    };
 
-    const sortedKeys = Object.keys(songs).sort((a, b) =>
-      a.localeCompare(b, "zh")
+    // ordenar por pinyin
+    const sortedKeys = Object.keys(json.songs).sort((a, b) =>
+      a.localeCompare(b, "zh-Hans-u-co-pinyin")
     );
 
     const sortedSongs: Record<string, any> = {};
     for (const key of sortedKeys) {
-      sortedSongs[key] = songs[key];
+      sortedSongs[key] = json.songs[key];
     }
 
-    return new Response(JSON.stringify(sortedSongs), {
+    // rescribir base de datos
+    const newJson = {
+      ...json,
+      songs: sortedSongs,
+    };
+
+    await fs.writeFile(filePath, JSON.stringify(newJson, null, 2), "utf-8");
+
+    return new Response(JSON.stringify(newJson), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -30,7 +38,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("error in /order.list", error);
     return new Response(
-      JSON.stringify({ error: "failed to read songs.json" }),
+      JSON.stringify({ error: "failed to read or write songs.json" }),
       {
         status: 500,
         headers: {
