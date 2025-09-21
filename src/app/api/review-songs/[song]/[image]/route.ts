@@ -12,7 +12,7 @@ export async function GET(
 
   try {
     const imageData = await fs.readFile(imagePath);
-    return new NextResponse(imageData, {
+    return new NextResponse(new Uint8Array(imageData), {
       headers: {
         "Content-Type": "image/png",
       },
