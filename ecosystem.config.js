@@ -4,7 +4,7 @@ module.exports = {
       name: "igle",
       script: "sh",
       args: "-c 'pnpm start'",
-      cwd: "/home/igle-songs",
+      cwd: "/srv/igle",
       env: {
         NODE_ENV: "production",
       },
